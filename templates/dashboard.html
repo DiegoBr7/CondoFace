@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CondoFace | Painel Administrativo</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <main class="container">
+
+        <!-- =====================================
+             CABECALHO
+        ====================================== -->
+
+        <header class="cabecalho-principal">
+
+            <div class="marca">
+
+                <div class="marca-icone">
+                    CF
+                </div>
+
+                <div>
+                    <h1>CondoFace</h1>
+                    <p>Painel Administrativo</p>
+                </div>
+
+            </div>
+
+            <div class="usuario-area">
+
+                <div class="usuario-info">
+                    <span>Administrador</span>
+                    <strong>{{ administrador }}</strong>
+                </div>
+
+                <form method="POST" action="{{ url_for('logout') }}">
+
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <button type="submit" class="btn btn-sair">
+                        Sair do sistema
+                    </button>
+
+                </form>
+
+            </div>
+
+        </header>
+
+
+        <!-- =====================================
+             RESUMO DO CONDOMINIO
+        ====================================== -->
+
+        <section class="secao-resumo">
+
+            <div class="titulo-secao">
+
+                <h2>Resumo do Condomínio</h2>
+
+                <p>
+                    Visão geral dos registros e acessos.
+                </p>
+
+            </div>
+
+            <div class="cards-resumo">
+
+                <article class="card-estatistica">
+
+                    <span class="card-label">
+                        Moradores
+                    </span>
+
+                    <strong id="moradores">0</strong>
+
+                    <span class="card-descricao">
+                        Moradores cadastrados
+                    </span>
+
+                </article>
+
+                <article class="card-estatistica">
+
+                    <span class="card-label">
+                        Visitantes
+                    </span>
+
+                    <strong id="visitantes">0</strong>
+
+                    <span class="card-descricao">
+                        Visitantes cadastrados
+                    </span>
+
+                </article>
+
+                <article class="card-estatistica">
+
+                    <span class="card-label">
+                        Acessos permitidos
+                    </span>
+
+                    <strong id="permitidos">0</strong>
+
+                    <span class="card-descricao">
+                        Entradas autorizadas
+                    </span>
+
+                </article>
+
+                <article class="card-estatistica">
+
+                    <span class="card-label">
+                        Acessos negados
+                    </span>
+
+                    <strong id="negados">0</strong>
+
+                    <span class="card-descricao">
+                        Entradas não autorizadas
+                    </span>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================
+             CADASTRAR MORADOR
+        ====================================== -->
+
+        <section class="cadastro-morador">
+
+            <div class="titulo-secao">
+
+                <h2>Cadastrar novo morador</h2>
+
+                <p>
+                    Preencha os dados para adicionar
+                    um morador ao condomínio.
+                </p>
+
+            </div>
+
+            <form id="form-cadastrar-morador">
+
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="form-grid">
+
+                    <div class="campo campo-nome">
+
+                        <label for="nome">
+                            Nome completo
+                        </label>
+
+                        <input type="text" id="nome" name="nome" placeholder="Ex.: Maria Oliveira" maxlength="150"
+                            required>
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="bloco">
+                            Bloco
+                        </label>
+
+                        <input type="text" id="bloco" name="bloco" placeholder="Ex.: A" maxlength="20" required>
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="apartamento">
+                            Apartamento
+                        </label>
+
+                        <input type="text" id="apartamento" name="apartamento" placeholder="Ex.: 101" maxlength="20"
+                            required>
+
+                    </div>
+
+                </div>
+
+                <div class="form-acoes">
+
+                    <button type="reset" class="btn btn-secundario">
+                        Limpar
+                    </button>
+
+                    <button type="submit" class="btn btn-primario">
+                        Cadastrar morador
+                    </button>
+
+                </div>
+
+            </form>
+
+            <p id="mensagem-cadastro" class="mensagem-feedback" role="status" aria-live="polite"></p>
+
+        </section>
+
+
+        <!-- =====================================
+             LISTAGEM DE MORADORES
+        ====================================== -->
+
+        <section class="secao-moradores">
+
+            <div class="cabecalho-secao">
+
+                <div>
+
+                    <h2>Moradores cadastrados</h2>
+
+                    <p>
+                        Consulte e gerencie os moradores
+                        registrados no condomínio.
+                    </p>
+
+                </div>
+
+                <button type="button" id="atualizar-moradores" class="btn btn-primario">
+                    Atualizar lista
+                </button>
+
+            </div>
+
+            <div class="tabela-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Bloco</th>
+                            <th scope="col">Apartamento</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Biometria</th>
+                            <th scope="col">Ações</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="tabela-moradores">
+
+                        <tr>
+                            <td colspan="7">
+                                Carregando moradores...
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <p id="mensagem-moradores" class="mensagem-feedback" role="status" aria-live="polite"></p>
+
+        </section>
+
+
+        <!-- =====================================
+             EDITAR MORADOR
+        ====================================== -->
+
+        <section id="secao-editar-morador" class="secao-editar-morador" hidden>
+
+            <div class="titulo-secao">
+
+                <h2>Editar morador</h2>
+
+                <p>
+                    Atualize os dados cadastrais
+                    do morador selecionado.
+                </p>
+
+            </div>
+
+            <form id="form-editar-morador">
+
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <input type="hidden" id="editar-id" name="id">
+
+                <div class="form-grid">
+
+                    <div class="campo campo-nome">
+
+                        <label for="editar-nome">
+                            Nome completo
+                        </label>
+
+                        <input type="text" id="editar-nome" name="nome" maxlength="150" required>
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="editar-bloco">
+                            Bloco
+                        </label>
+
+                        <input type="text" id="editar-bloco" name="bloco" maxlength="20" required>
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="editar-apartamento">
+                            Apartamento
+                        </label>
+
+                        <input type="text" id="editar-apartamento" name="apartamento" maxlength="20" required>
+
+                    </div>
+
+                </div>
+
+                <div class="form-acoes">
+
+                    <button type="button" id="cancelar-edicao" class="btn btn-secundario">
+                        Cancelar
+                    </button>
+
+                    <button type="submit" class="btn btn-primario">
+                        Salvar alterações
+                    </button>
+
+                </div>
+
+            </form>
+
+            <p id="mensagem-edicao" class="mensagem-feedback" role="status" aria-live="polite"></p>
+
+        </section>
+
+
+        <!-- =====================================
+     CADASTRO DE VISITANTES
+====================================== -->
+
+        <section class="cadastro-visitante">
+
+            <div class="titulo-secao">
+                <h2>Cadastrar novo visitante</h2>
+                <p>
+                    Preencha os dados para adicionar
+                    um visitante ao condomínio.
+                </p>
+            </div>
+
+            <form id="form-cadastrar-visitante">
+
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="form-grid">
+
+                    <div class="campo campo-nome">
+                        <label for="visitante-nome">
+                            Nome completo
+                        </label>
+
+                        <input type="text" id="visitante-nome" name="nome" maxlength="150"
+                            placeholder="Ex.: Rafael Oliveira" required>
+                    </div>
+
+                    <div class="campo">
+                        <label for="visitante-documento">
+                            Documento
+                        </label>
+
+                        <input type="text" id="visitante-documento" name="documento" maxlength="30"
+                            placeholder="RG ou CPF">
+                    </div>
+
+                    <div class="campo">
+                        <label for="visitante-telefone">
+                            Telefone
+                        </label>
+
+                        <input type="tel" id="visitante-telefone" name="telefone" maxlength="20"
+                            placeholder="(11) 99999-9999">
+                    </div>
+
+                </div>
+
+                <div class="form-acoes">
+
+                    <button type="reset" class="btn btn-secundario">
+                        Limpar
+                    </button>
+
+                    <button type="submit" class="btn btn-primario">
+                        Cadastrar visitante
+                    </button>
+
+                </div>
+
+            </form>
+
+            <p id="mensagem-cadastro-visitante" class="mensagem-feedback" role="status" aria-live="polite"></p>
+
+        </section>
+
+
+
+        <!-- =====================================
+             LISTAGEM DE VISITANTES
+        ====================================== -->
+
+        <section class="secao-visitantes">
+
+            <div class="cabecalho-secao">
+
+                <div>
+
+                    <h2>Visitantes cadastrados</h2>
+
+                    <p>
+                        Consulte os visitantes registrados
+                        no sistema.
+                    </p>
+
+                </div>
+
+                <button type="button" id="atualizar-visitantes" class="btn btn-primario">
+                    Atualizar lista
+                </button>
+
+            </div>
+
+            <div class="tabela-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Biometria</th>
+                            <th scope="col">Ações</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="tabela-visitantes">
+
+                        <tr>
+                            <td colspan="5">
+                                Carregando visitantes...
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <p id="mensagem-visitantes" class="mensagem-feedback" role="status" aria-live="polite"></p>
+
+        </section>
+
+        <!-- =====================================
+     EDITAR VISITANTE
+====================================== -->
+
+        <section id="secao-editar-visitante" class="secao-editar-visitante" hidden>
+            <div class="titulo-secao">
+                <h2>Editar visitante</h2>
+                <p>
+                    Atualize os dados do visitante selecionado.
+                </p>
+            </div>
+
+            <form id="form-editar-visitante">
+
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <input type="hidden" id="editar-visitante-id" name="id">
+
+                <div class="form-grid">
+
+                    <div class="campo campo-nome">
+                        <label for="editar-visitante-nome">
+                            Nome completo
+                        </label>
+
+                        <input type="text" id="editar-visitante-nome" name="nome" maxlength="150" required>
+                    </div>
+
+                    <div class="campo">
+                        <label for="editar-visitante-documento">
+                            Documento
+                        </label>
+
+                        <input type="text" id="editar-visitante-documento" name="documento" maxlength="30">
+                    </div>
+
+                    <div class="campo">
+                        <label for="editar-visitante-telefone">
+                            Telefone
+                        </label>
+
+                        <input type="tel" id="editar-visitante-telefone" name="telefone" maxlength="20">
+                    </div>
+
+                </div>
+
+                <div class="form-acoes">
+
+                    <button type="button" id="cancelar-edicao-visitante" class="btn btn-secundario">
+                        Cancelar
+                    </button>
+
+                    <button type="submit" class="btn btn-primario">
+                        Salvar alterações
+                    </button>
+
+                </div>
+            </form>
+
+            <p id="mensagem-edicao-visitante" class="mensagem-feedback" role="status" aria-live="polite"></p>
+        </section>
+
+
+        <!-- =====================================
+             RODAPE
+        ====================================== -->
+
+
+        <!-- CADASTRO FACIAL PELO NAVEGADOR -->
+        <section id="secao-biometria" class="secao-biometria" hidden>
+            <div class="titulo-secao">
+                <h2>Cadastro facial</h2>
+                <p id="biometria-pessoa">Selecione um morador ou visitante.</p>
+            </div>
+            <input type="hidden" id="biometria-csrf" value="{{ csrf_token() }}">
+            <div class="biometria-camera">
+                <video id="biometria-video" autoplay playsinline muted></video>
+            </div>
+            <p id="biometria-progresso" role="status" aria-live="polite">Imagens enviadas: 0/30</p>
+            <progress id="biometria-barra" value="0" max="30"></progress>
+            <p id="biometria-mensagem" class="mensagem-feedback" role="status" aria-live="polite"></p>
+            <div class="form-acoes">
+                <button type="button" id="biometria-iniciar" class="btn btn-primario">Iniciar captura</button>
+                <button type="button" id="biometria-cancelar" class="btn btn-secundario">Fechar / cancelar</button>
+            </div>
+            <p>Use somente com autorização da pessoa. As imagens são dados biométricos sensíveis.</p>
+        </section>
+
+
+        <section class="secao-historico">
+
+            <div class="cabecalho-secao">
+                <div>
+                    <h2>Histórico de acessos</h2>
+                    <p>
+                        Consulte as tentativas de entrada
+                        registradas no condomínio.
+                    </p>
+                </div>
+
+                <button type="button" id="atualizar-historico" class="btn btn-primario">
+                    Atualizar histórico
+                </button>
+            </div>
+
+            <div class="tabela-container">
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Tipo</th>
+                            <th>Data e hora</th>
+                            <th>Resultado</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+
+
+                    <tbody id="tabela-historico"></tbody>
+                </table>
+            </div>
+
+            <p id="mensagem-historico" class="mensagem-feedback" role="status">
+            </p>
+
+        </section>
+
+
+        <footer class="rodape">
+
+            <p>
+                CondoFace © 2026 —
+                Sistema de Controle de Acesso
+            </p>
+
+        </footer>
+
+    </main>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+</body>
+
+</html>
