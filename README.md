@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # CondoFace — Controle de acesso com reconhecimento facial
 
 O **CondoFace** é um projeto acadêmico de controle de acesso para condomínios. Ele reúne um painel administrativo web, cadastros de moradores e visitantes, captura de imagens faciais, treinamento de um reconhecedor LBPH e registro de tentativas de acesso no MySQL.
@@ -296,4 +296,4 @@ Demonstrar a integração entre visão computacional, persistência de dados, re
 **CondoFace — projeto acadêmico e de portfólio, em desenvolvimento.**
 =======
 # CondoFace
->>>>>>> 1a18c53 (Initial commit)
+ 1a18c53 (Initial commit)
