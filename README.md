@@ -291,9 +291,3 @@ Antes de publicar:
 
 Demonstrar a integração entre visão computacional, persistência de dados, regras de autorização e interface administrativa, aplicando Python, OpenCV, Flask e MySQL em um protótipo de controle de acesso.
 
----
-
-**CondoFace — projeto acadêmico e de portfólio, em desenvolvimento.**
-=======
-# CondoFace
- 1a18c53 (Initial commit)

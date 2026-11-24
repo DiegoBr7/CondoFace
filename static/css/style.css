@@ -490,3 +490,23 @@ tbody tr:hover {
 .secao-editar-visitante {
     border-left: 4px solid #1565c0;
 }
+
+/* BOTÃO EXCLUIR */
+
+.btn-excluir {
+    background-color: #dc2626;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-excluir:hover {
+    background-color: #b91c1c;
+}
+
+.btn-excluir:active {
+    background-color: #991b1b;
+}

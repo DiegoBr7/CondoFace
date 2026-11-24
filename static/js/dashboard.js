@@ -205,10 +205,21 @@ async function carregarMoradores() {
                 abrirCadastroFacial("morador", morador);
             });
 
+            const botaoExcluir = document.createElement("button");
+
+            botaoExcluir.type = "button";
+            botaoExcluir.className = "btn btn-excluir";
+            botaoExcluir.textContent = "Excluir";
+
+            botaoExcluir.addEventListener("click", () => {
+                excluirPessoa("morador", morador);
+            });
+
             container.append(
                 botaoEditar,
                 botaoStatus,
-                botaoFace
+                botaoFace,
+                botaoExcluir
             );
 
             celulaAcoes.appendChild(container);
@@ -551,11 +562,23 @@ async function carregarVisitantes() {
                 abrirCadastroFacial("visitante", visitante);
             });
 
+            const botaoExcluir = document.createElement("button");
+
+            botaoExcluir.type = "button";
+            botaoExcluir.className = "btn btn-excluir";
+            botaoExcluir.textContent = "Excluir";
+
+            botaoExcluir.addEventListener("click", () => {
+                excluirPessoa("visitante", visitante);
+            });
+
             container.append(
                 botaoEditar,
                 botaoStatus,
-                botaoFace
+                botaoFace,
+                botaoExcluir
             );
+            
             celulaAcoes.appendChild(container);
         });
 
@@ -1305,5 +1328,68 @@ if (botaoAtualizarHistorico) {
 carregarHistorico();
 
 
+// ==========================================
+// EXCLUIR MORADOR OU VISITANTE
+// ==========================================
+
+async function excluirPessoa(tipo, pessoa) {
+
+    const confirmou = window.confirm(
+        `Deseja realmente excluir o ${tipo} "${pessoa.nome}"?`
+    );
+
+    if (!confirmou) {
+        return;
+    }
+
+    const tabela = tipo === "morador"
+        ? "moradores"
+        : "visitantes";
+
+    const formulario = tipo === "morador"
+        ? formularioCadastro
+        : document.getElementById("form-cadastrar-visitante");
+
+    const mensagem = document.getElementById(
+        `mensagem-${tabela}`
+    );
+
+    try {
+
+        const dados = new FormData();
+
+        dados.append(
+            "csrf_token",
+            obterTokenCSRF(formulario)
+        );
+
+        const resposta = await fetch(
+            `/api/${tabela}/${encodeURIComponent(pessoa.id)}`,
+            {
+                method: "DELETE",
+                credentials: "same-origin",
+                body: dados
+            }
+        );
+
+        const resultado = await lerResposta(resposta);
+
+        await Promise.all([
+            carregarMoradores(),
+            carregarVisitantes(),
+            carregarDashboard()
+        ]);
+
+        mensagem.textContent = resultado.mensagem;
+
+    } catch (erro) {
+
+        console.error("Erro ao excluir:", erro);
+        mensagem.textContent = erro.message;
+
+    }
+}
 
 "use strict";
+
+

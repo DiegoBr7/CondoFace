@@ -424,6 +424,7 @@ def listar_moradores():
                 ativo,
                 biometria_cadastrada
             FROM moradores
+            WHERE excluido = FALSE
             ORDER BY nome
         """
 
@@ -477,6 +478,7 @@ def listar_visitantes():
                 ativo,
                 biometria_cadastrada
             FROM visitantes
+            WHERE excluido = FALSE
             ORDER BY nome
         """
 
@@ -651,7 +653,7 @@ def editar_morador(morador_id):
 
         if linhas == 0:
             cursor.execute(
-                "SELECT id FROM moradores WHERE id = %s",
+                "SELECT id FROM moradores WHERE id = %s AND excluido = FALSE",
                 (morador_id,)
             )
 
@@ -719,6 +721,7 @@ def alterar_status_morador(morador_id):
             UPDATE moradores
             SET ativo = %s
             WHERE id = %s
+            AND excluido = FALSE
             """,
             (int(ativo), morador_id)
         )
@@ -909,7 +912,7 @@ def editar_visitante(visitante_id):
 
         if cursor.rowcount == 0:
             cursor.execute(
-                "SELECT id FROM visitantes WHERE id = %s",
+                "SELECT id FROM visitantes WHERE id = %s AND excluido = FALSE",
                 (visitante_id,)
             )
 
@@ -974,6 +977,7 @@ def alterar_status_visitante(visitante_id):
             UPDATE visitantes
             SET ativo = %s
             WHERE id = %s
+            AND excluido = FALSE
             """,
             (int(ativo), visitante_id)
         )
@@ -1263,6 +1267,137 @@ def consultar_historico():
         }), 500
 
 
+
+# ==========================================
+# API - EXCLUIR MORADOR
+# ==========================================
+
+@app.route("/api/moradores/<int:morador_id>", methods=["DELETE"])
+@login_required
+def excluir_morador(morador_id):
+
+    validar_csrf()
+
+    conexao = None
+    cursor = None
+
+    try:
+        conexao = conectar()
+        cursor = conexao.cursor()
+
+        cursor.execute("""
+            UPDATE moradores
+            SET ativo = FALSE,
+                excluido = TRUE,
+                biometria_cadastrada = FALSE
+            WHERE id = %s
+              AND excluido = FALSE
+        """, (morador_id,))
+
+        if cursor.rowcount == 0:
+            return jsonify({
+                "erro": "Morador não encontrado ou já excluído."
+            }), 404
+
+        cursor.execute("""
+            UPDATE autorizacoes_visitantes
+            SET permitido = FALSE
+            WHERE morador_id = %s
+        """, (morador_id,))
+
+        conexao.commit()
+
+        return jsonify({
+            "mensagem": "Morador excluído com sucesso!"
+        }), 200
+
+    except Exception:
+
+        if conexao is not None:
+            conexao.rollback()
+
+        app.logger.exception("Erro ao excluir morador")
+
+        return jsonify({
+            "erro": "Erro ao excluir morador."
+        }), 500
+
+    finally:
+
+        if cursor is not None:
+            cursor.close()
+
+        if conexao is not None:
+            conexao.close()
+            
+
+# ==========================================
+# API - EXCLUIR MORADOR
+# ==========================================
+
+# ==========================================
+# API - EXCLUIR VISITANTE
+# ==========================================
+
+@app.route("/api/visitantes/<int:visitante_id>", methods=["DELETE"])
+@login_required
+def excluir_visitante(visitante_id):
+
+    validar_csrf()
+
+    conexao = None
+    cursor = None
+
+    try:
+        conexao = conectar()
+        cursor = conexao.cursor()
+
+        cursor.execute("""
+            UPDATE visitantes
+            SET ativo = FALSE,
+                excluido = TRUE,
+                biometria_cadastrada = FALSE
+            WHERE id = %s
+              AND excluido = FALSE
+        """, (visitante_id,))
+
+        if cursor.rowcount == 0:
+            return jsonify({
+                "erro": "Visitante não encontrado ou já excluído."
+            }), 404
+
+        cursor.execute("""
+            UPDATE autorizacoes_visitantes
+            SET permitido = FALSE
+            WHERE visitante_id = %s
+        """, (visitante_id,))
+
+        conexao.commit()
+
+        return jsonify({
+            "mensagem": "Visitante excluído com sucesso!"
+        }), 200
+
+    except Exception:
+
+        if conexao is not None:
+            conexao.rollback()
+
+        app.logger.exception("Erro ao excluir visitante")
+
+        return jsonify({
+            "erro": "Erro ao excluir visitante."
+        }), 500
+
+    finally:
+
+        if cursor is not None:
+            cursor.close()
+
+        if conexao is not None:
+            conexao.close()
+            
+            
 if __name__ == "__main__":
 
     app.run(
